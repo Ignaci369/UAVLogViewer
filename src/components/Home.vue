@@ -4,7 +4,7 @@
             Warning: Cesium token is not configured. 3D map imagery and terrain may not load.
             Configure it by setting VUE_APP_CESIUM_TOKEN in the environment.
         </div>
-        <template v-if="state.mapLoading || state.plotLoading">
+        <template v-if="(state.mapLoading && !state.mapError) || state.plotLoading">
             <div id="waiting">
                 <atom-spinner
                     :animation-duration="1000"
@@ -34,9 +34,25 @@
                     </div>
                 </div>
                 <div class="row" v-bind:class="[state.plotOn ? 'h-50' : 'h-100']"
-                     v-if="state.mapAvailable && mapOk && state.showMap">
+                     v-if="state.showMap">
                     <div class="col-12 noPadding">
-                        <CesiumViewer ref="cesiumViewer"/>
+                        <CesiumViewer v-if="state.mapAvailable && mapOk && !state.mapError" ref="cesiumViewer"/>
+                        <div v-if="state.mapError" class="map-error-container">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Map Initialization Failed</h3>
+                            <p>{{ state.mapError }}</p>
+                            <button
+                                @click="state.mapError = null; state.showMap = false"
+                                class="btn btn-outline-info btn-sm">Dismiss</button>
+                        </div>
+                        <div v-else-if="!(state.mapAvailable && mapOk)" class="map-error-container">
+                             <i class="fas fa-map-marked-alt"></i>
+                             <h3>No Map Data</h3>
+                             <p>This log file does not contain enough GPS or trajectory data to display on the map.</p>
+                             <button
+                                 @click="state.showMap = false"
+                                 class="btn btn-outline-info btn-sm">Close Map</button>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -347,6 +363,39 @@ export default {
         opacity: 0.75;
         text-align: center;
     }
+
+    .map-error-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background-color: #1a1e24;
+        color: #e0e6ed;
+        text-align: center;
+        padding: 2rem;
+        border: 1px solid #3d4450;
+        border-radius: 8px;
+        margin: 10px;
+    }
+
+    .map-error-container i {
+        font-size: 3rem;
+        color: #ffcc00;
+        margin-bottom: 1rem;
+    }
+
+    .map-error-container h3 {
+        margin-bottom: 0.5rem;
+        color: #64e9ff;
+    }
+
+    .map-error-container p {
+        max-width: 500px;
+        margin-bottom: 1.5rem;
+        color: #acb6c2;
+    }
+
     /* ATOM SPINNER */
 
       div .atom-spinner {

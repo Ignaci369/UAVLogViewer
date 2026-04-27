@@ -33,6 +33,7 @@ export const store = {
     processStatus: 'Pre-processing...',
     processPercentage: -1,
     mapLoading: false,
+    mapError: null,
     plotLoading: false,
     timeRange: null,
     textMessages: [],
